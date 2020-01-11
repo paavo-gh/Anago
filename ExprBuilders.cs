@@ -67,9 +67,16 @@ namespace LangProj
             // In case of a function: New type is defined mapping the given variable name 
             // to the return type of the function.
             // TODO For testing?
-            // TODO Generic functions
-            analyzer.Context.AddType(variable.Name, 
-                () => (variable.Type.ConcreteType as TypeFunction).ReturnType);
+            analyzer.Context.AddType(variable.Name, () => {
+                var funType = variable.Type.ConcreteType as TypeFunction;
+                if (funType == null)
+                    throw new CompilationException("Not a type: " + variable.Name);
+                // Generic types
+                var genType = variable.Type as TypeGenericContext;
+                if (genType != null)
+                    return new TypeGenericContext(funType.ReturnType, genType.GenericParameters);
+                return funType.ReturnType;
+            });
             //Console.WriteLine("Type defined: " + variable.Name);
 
             return new ExprImpl(TypeSingleton.Void, exprWriter.WriteVariable(analyzer.Context.GetReferenceIndex(variable), right));

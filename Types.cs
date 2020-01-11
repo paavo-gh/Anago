@@ -142,7 +142,19 @@ namespace LangProj
 
         public IType CreateGenericType(IEnumerable<IType> types)
         {
-            throw new CompilationException("Generics not supported on this type");
+            var dict = new Dictionary<IType, IType>();
+            var e1 = GenericParameters.GetEnumerator();
+            var e2 = types.GetEnumerator();
+            while (e1.MoveNext())
+            {
+                if (e2.MoveNext())
+                    dict[e1.Current] = e2.Current;
+                else
+                    throw new CompilationException("Too few generic parameters provided");
+            }
+            if (e2.MoveNext())
+                throw new CompilationException("Too many generic parameters provided");
+            return ConvertGeneric(type => dict[type]);
         }
     }
 
