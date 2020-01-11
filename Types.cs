@@ -100,9 +100,17 @@ namespace LangProj
         public bool AssignableFrom(IType other)
             => constraintType.AssignableFrom(other.ConcreteType);
 
-        public IType ConvertGeneric(Func<IType, IType> converter) => converter(this);
+        public IType ConvertGeneric(Func<IType, IType> converter)
+        {
+            var type = converter(this);
+            // Generic contraint can constist of other generic types
+            var convertedConstraint = constraintType.ConvertGeneric(converter);
+            if (convertedConstraint.AssignableFrom(type))
+                return type;
+            throw new CompilationException("Generic argument with type constraint " + convertedConstraint + " cannot be set to " + type);
+        }
 
-        public IType ConcreteType => constraintType;
+        public IType ConcreteType => constraintType.ConcreteType;
 
         public IType CreateGenericType(IEnumerable<IType> types)
         {
@@ -110,6 +118,8 @@ namespace LangProj
         }
 
         public IEnumerable<TypeGeneric> GenericParameters => Array.Empty<TypeGeneric>();
+
+        public override string ToString() => "Generic(" + constraintType + ")";
     }
 
     public class TypeGenericContext : IType

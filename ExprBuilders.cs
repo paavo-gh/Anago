@@ -147,11 +147,8 @@ namespace LangProj
             if (to.MoveNext())
                 analyzer.Fail("Too few generic arguments", exprLeft);
             
-            return new ExprImpl(left.Type.ConvertGeneric(GetType), left);
-
-            IType GetType(IType t) => dict[t];
+            return new ExprImpl(left.Type.ConvertGeneric(dict.GetValueOrDefault), left);
         }
-
 
         public Expr FunctionCall(AnalyzerContext analyzer, ExprBuilderObj leftExpr, IEnumerable<ExprBuilderObj> args)
         {   
